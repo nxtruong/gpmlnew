@@ -1,5 +1,4 @@
-function K = covSEard(hyp, x, z, i)
-
+function [K, covdata] = covSEard(hyp, x, z, i, covdata)
 % Squared Exponential covariance function with Automatic Relevance Detemination
 % (ARD) distance measure. The covariance function is parameterized as:
 %
@@ -16,6 +15,7 @@ function K = covSEard(hyp, x, z, i)
 %         log(sf) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified and copyright (c) by Truong X. Nghiem, 2016-02-21.
 %
 % See also COVFUNCTIONS.M.
 
@@ -29,30 +29,52 @@ sf2 = exp(2*hyp(D+1));                                         % signal variance
 
 % precompute squared distances
 if dg                                                               % vector kxx
-  K = zeros(size(x,1),1);
+    K = zeros(n,1);
+    covdata = [];               % simple case -> don't need saved data
+    has_covdata = false;        % if we have a valid covdata input
+    covdata_out = false;        % if we need to save covdata output
 else
-  if xeqz                                                 % symmetric matrix Kxx
-    K = sq_dist(diag(1./ell)*x');
-  else                                                   % cross covariances Kxz
-    K = sq_dist(diag(1./ell)*x',diag(1./ell)*z');
-  end
+    if xeqz                                                 % symmetric matrix Kxx
+        % if we have a valid covdata input
+        has_covdata = nargin > 4 && isequal(size(covdata), [n, n]);
+        if ~has_covdata
+            K = sq_dist(diag(1./ell)*x');
+        end
+    else                                                   % cross covariances Kxz
+        nz = size(z, 1);
+        % if we have a valid covdata input
+        has_covdata = nargin > 4 && isequal(size(covdata), [n, nz]);
+        if ~has_covdata
+            K = sq_dist(diag(1./ell)*x',diag(1./ell)*z');
+        end
+    end
+    covdata_out = nargout > 1;
 end
 
-K = sf2*exp(-K/2);                                                  % covariance
-if nargin>3                                                        % derivatives
-  if i<=D                                              % length scale parameters
-    if dg
-      K = K*0;
-    else
-      if xeqz
-        K = K.*sq_dist(x(:,i)'/ell(i));
-      else
-        K = K.*sq_dist(x(:,i)'/ell(i),z(:,i)'/ell(i));
-      end
+% Covariance function data consists of this K, which is covariance matrix
+if has_covdata
+    K = covdata;
+else
+    K = sf2*exp(-K/2);                                                  % covariance
+    if covdata_out
+        covdata = K;
     end
-  elseif i==D+1                                            % magnitude parameter
-    K = 2*K;
-  else
-    error('Unknown hyperparameter')
-  end
+end
+
+if nargin>3 && ~isempty(i)                               % derivatives
+    if i<=D                                              % length scale parameters
+        if dg
+            K = zeros(size(K));
+        else
+            if xeqz
+                K = K.*sq_dist(x(:,i)'/ell(i));
+            else
+                K = K.*sq_dist(x(:,i)'/ell(i),z(:,i)'/ell(i));
+            end
+        end
+    elseif i==D+1                                            % magnitude parameter
+        K = 2*K;
+    else
+        error('Unknown hyperparameter %d', i)
+    end
 end

@@ -51,7 +51,7 @@ if nargin<5 || isempty(i)                                          % covariances
     end
 else                                                               % derivatives
     if nargin > 5
-        has_covdata =  isstruct(covdatain) && (numel(covdatain) == length(cov)) ...
+        has_covdata = isstruct(covdatain) && (numel(covdatain) == length(cov)) ...
             && all(isfield(covdatain, {'d', 'K'}));
     else
         has_covdata = false;

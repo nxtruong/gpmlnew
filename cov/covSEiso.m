@@ -25,7 +25,7 @@ ell = exp(hyp(1));                                 % characteristic length scale
 sf2 = exp(2*hyp(2));                                           % signal variance
 
 % precompute squared distances
-% Covariance function data consists of 
+% Covariance function data consists of this K
 if dg                                                               % vector kxx
     K = zeros(size(x,1),1);
     covdata = [];                  % simple case -> don't need saved data
