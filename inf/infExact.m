@@ -17,7 +17,11 @@ end
 
 [n, D] = size(x);
 % evaluate covariance matrix and save the covariance function data
-[K, covdata] = feval(cov{:}, hyp.cov, x);
+if nargout>1
+    [K, covdata] = feval(cov{:}, hyp.cov, x);
+else
+    K = feval(cov{:}, hyp.cov, x);
+end
 m = feval(mean{:}, hyp.mean, x);                          % evaluate mean vector
 
 sn2 = exp(2*hyp.lik);                               % noise variance of likGauss
