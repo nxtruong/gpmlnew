@@ -1,4 +1,4 @@
-function K = covCos(hyp, x, z, i)
+function [K, covdata] = covCos(hyp, x, z, i, covdata)
 
 % Stationary covariance function for a sinusoid with period p in 1d:
 %
@@ -12,12 +12,15 @@ function K = covCos(hyp, x, z, i)
 % Note that covPeriodicNoDC converges to covCos as ell goes to infinity.
 %
 % Copyright (c) by James Robert Lloyd, 2013-08-05.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M, COVPERIODICNODC.M.
 
 if nargin<2, K = '2'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 [n,D] = size(x);
 if D>1, error('Covariance is defined for 1d data only.'), end
@@ -36,7 +39,7 @@ else
 end
 
 K = 2*pi*K/p;
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
     K = sf2*cos(K);
 else                                                               % derivatives
   if i==1

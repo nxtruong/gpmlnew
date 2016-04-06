@@ -1,4 +1,4 @@
-function K = covScale(cov, lsf, hyp, x, z, i)
+function [K, covdata] = covScale(cov, lsf, hyp, x, z, i, covdata)
 
 % covScale - compose a covariance function as a scaled version of another
 % one to model functions of the form f(x) = sf(x) f0(x), where sf(x) is a
@@ -23,6 +23,7 @@ function K = covScale(cov, lsf, hyp, x, z, i)
 %
 % Copyright (c) by Carl Edward Rasmussen, Hannes Nickisch & Roman Garnett
 %                                                                    2014-09-05.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
@@ -46,6 +47,8 @@ nsf  = eval(ssf);           hyp_lsf = hyp(1:nsf);  % number of params, split hyp
 ncov = eval(feval(cov{:})); hyp_cov = hyp(nsf+(1:ncov));
 scalar = isempty(lsf); if scalar, sf = exp(hyp_lsf); end
 
+covdata = [];
+
 if scalar, sfx = sf; else sfx = exp(feval(lsf{:},hyp_lsf,x)); end
 if dg
   K = sfx.*sfx;
@@ -55,7 +58,7 @@ else
   K = sfx*sfz';
 end
 
-if narg<6                                                          % covariances
+if narg<6 || isempty(i)                                            % covariances
   K = K.*feval(cov{:},hyp_cov,x,z);
 else                                                               % derivatives
   if i>nsf                             % wrt covariance function hyperparameters

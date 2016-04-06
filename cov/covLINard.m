@@ -1,5 +1,4 @@
-function K = covLINard(hyp, x, z, i)
-
+function [K, covdata] = covLINard(hyp, x, z, i, covdata)
 % Linear covariance function with Automatic Relevance Determination (ARD). The
 % covariance function is parameterized as:
 %
@@ -16,6 +15,7 @@ function K = covLINard(hyp, x, z, i)
 % Note that there is no bias term; use covConst to add a bias.
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
@@ -23,8 +23,10 @@ if nargin<2, K = 'D'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
+covdata = [];
+
 ell = exp(hyp);
-[n,D] = size(x);
+[~,D] = size(x);
 x = x*diag(1./ell);
 
 % precompute inner products
@@ -39,7 +41,7 @@ else
   end
 end
 
-if nargin>3                                                        % derivatives
+if nargin>3 && ~isempty(i)                                         % derivatives
   if i<=D
     if dg
       K = -2*x(:,i).*x(:,i);

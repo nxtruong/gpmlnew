@@ -1,4 +1,4 @@
-function K = covPref(cov, hyp, x, z, varargin)
+function [K, covdata] = covPref(cov, hyp, x, z, varargin)
 
 % covPref - covariance function for preference learning. The covariance
 % function corresponds to a prior on f(x1) - f(x2).
@@ -14,10 +14,13 @@ function K = covPref(cov, hyp, x, z, varargin)
 % See Collaborative Gaussian Processes for Preference Learning, NIPS 2014.
 %
 % Copyright (c) by Hannes Nickisch and Roman Garnett, 2014-11-01.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<3, K = strrep(feval(cov{:}),'D','D/2'); return; end     % no of params
+
+covdata = [];
 
 x1 = x(:,1:end/2); x2 = x(:,1+end/2:end);
 if nargin<4 || isempty(z), z = x; end

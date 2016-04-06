@@ -1,4 +1,4 @@
-function K = covSEvlen(llen, hyp, x, z, i)
+function [K, covdata] = covSEvlen(llen, hyp, x, z, i, covdata)
 
 % Squared Exponential covariance function with spatially varying lengthscale.
 % The covariance function is parameterized as:
@@ -26,6 +26,7 @@ function K = covSEvlen(llen, hyp, x, z, i)
 % For more help on design of covariance functions, try "help covFunctions".
 %
 % Copyright (c) by Hannes Nickisch, 2014-09-06.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVSEISO.M, COVFUNCTIONS.M.
 
@@ -33,6 +34,8 @@ nhl = feval(llen{:});   % number of hyperparameters reserved for the lengthscale
 if nargin<3, K = [nhl,'+1']; return; end           % report number of parameters
 if nargin<4, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 [n,D] = size(x); nhl = eval(nhl);   % evaluate lengthscale hyperparameter string
 hypl = hyp(1:nhl);                            % length scale function parameters
@@ -55,7 +58,7 @@ else
 end
 
 A = 2*Lprod./L2sum; B = exp(-K./L2sum);
-if nargin<5                                                        % covariances
+if nargin<5 || isempty(i)                                          % covariances
   K = sf2*A.^(D/2).*B;
 else                                                               % derivatives
   if i<=nhl

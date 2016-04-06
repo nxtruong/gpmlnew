@@ -1,4 +1,4 @@
-function K = covSEfact(d, hyp, x, z, i)
+function [K, covdata] = covSEfact(d, hyp, x, z, i, covdata)
 
 % Factor analysis squared exponential covariance.
 %
@@ -38,6 +38,7 @@ function K = covSEfact(d, hyp, x, z, i)
 %              L_dD]
 %
 % Copyright (c) by Roman Garnett & Hannes Nickisch, 2014-08-15.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
@@ -52,6 +53,8 @@ if d>D, error('We need d<=D.'), end
 nh = eval(nh);
 sf = exp(hyp(nh)); hyp = hyp(1:nh-1);            % bring hypers in correct shape
 
+covdata = [];
+
 L = zeros(d,D); L(triu(true(d,D))) = hyp(:);                  % embedding matrix
 if d==1, diagL = L(1); else diagL = diag(L); end    % properly handle limit case
 L(1:d+1:d*d) = exp(diagL);
@@ -61,7 +64,7 @@ if dg, zl = 'diag';
 else
   if xeqz, zl = xl; else zl = z*L'; end
 end
-if nargin<5                   % covariance, call covSEiso on the embedded points
+if nargin<5 || isempty(i)     % covariance, call covSEiso on the embedded points
   K = covSEiso([0;log(sf)],xl,zl);
 else
   if i==nh                     % derivative w.r.t. log signal standard deviation

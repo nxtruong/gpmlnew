@@ -1,4 +1,4 @@
-function K = covSM(Q, hyp, x, z, i)
+function [K, covdata] = covSM(Q, hyp, x, z, i, covdata)
 
 % Gaussian Spectral Mixture covariance function. The covariance function 
 % parametrization depends on the sign of Q.
@@ -47,6 +47,7 @@ function K = covSM(Q, hyp, x, z, i)
 % For Q<0, covSM corresponds to Eq. 14 in Ref (2) (but w here = w^2 in (14))
 %
 % Copyright (c) by Andrew Gordon Wilson and Hannes Nickisch, 2014-09-24.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M, COVGABORISO.M, COVGABORARD.M.
 
@@ -55,6 +56,8 @@ if nargin<3                                            % report no of parameters
   if smp, K = '3*D*'; else K = '(1+2*D)*'; end, K = [K,sprintf('%d',Q)]; return
 end
 if nargin<4, z = []; end                                   % make sure, z exists
+
+covdata = [];
 
 D = size(x,2); P = smp*D+(1-smp);                   % dimensionality, P=D or P=1
 lw = reshape(hyp(         1:P*Q) ,P,Q);                    % log mixture weights
@@ -81,7 +84,7 @@ else
   hyp = [lw/2;     -ls-log(2*pi);     -lm    ];
 end
 
-if nargin<5                                       % evaluation of the covariance
+if nargin<5 || isempty(i)                         % evaluation of the covariance
   K = feval(cov{:},hyp(:),x,z);
 else
   % We compute the indices j in the new hyperparameter vector hyp. The

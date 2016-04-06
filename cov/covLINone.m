@@ -1,4 +1,4 @@
-function K = covLINone(hyp, x, z, i)
+function [K, covdata] = covLINone(hyp, x, z, i, covdata)
 
 % Linear covariance function with a single hyperparameter. The covariance
 % function is parameterized as:
@@ -11,12 +11,15 @@ function K = covLINone(hyp, x, z, i)
 % hyp = [ log(t) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<2, K = '1'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 it2 = exp(-2*hyp);                                                  % t2 inverse
 
@@ -31,7 +34,7 @@ else
   end
 end
 
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
   K = it2*(1+K);
 else                                                               % derivatives
   if i==1

@@ -1,4 +1,4 @@
-function K = covNoise(hyp, x, z, i)
+function [K, covdata] = covNoise(hyp, x, z, i, covdata)
 
 % Independent covariance function, i.e. "white noise", with specified variance.
 % The covariance function is specified as:
@@ -16,6 +16,7 @@ function K = covNoise(hyp, x, z, i)
 % For more help on design of covariance functions, try "help covFunctions".
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2013-05-15.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
@@ -23,6 +24,8 @@ tol = eps;   % threshold on the norm when two vectors are considered to be equal
 if nargin<2, K = '1'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 dg = strcmp(z,'diag');                                          % determine mode
+
+covdata = [];
 
 n = size(x,1);
 s2 = exp(2*hyp);                                                % noise variance
@@ -38,7 +41,7 @@ else
   end
 end
 
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
   K = s2*K;
 else                                                               % derivatives
   if i==1

@@ -1,4 +1,4 @@
-function K = covMaterniso(d, hyp, x, z, i)
+function [K, covdata] = covMaterniso(d, hyp, x, z, i, covdata)
 
 % Matern covariance function with nu = d/2 and isotropic distance measure. For
 % d=1 the function is also known as the exponential covariance function or the 
@@ -6,7 +6,7 @@ function K = covMaterniso(d, hyp, x, z, i)
 %
 %   k(x^p,x^q) = sf^2 * f( sqrt(d)*r ) * exp(-sqrt(d)*r)
 %
-% with f(t)=1 for d=1, f(t)=1+t for d=3 and f(t)=1+t+t²/3 for d=5.
+% with f(t)=1 for d=1, f(t)=1+t for d=3 and f(t)=1+t+t??/3 for d=5.
 % Here r is the distance sqrt((x^p-x^q)'*inv(P)*(x^p-x^q)), P is ell times
 % the unit matrix and sf2 is the signal variance. The hyperparameters are:
 %
@@ -14,12 +14,15 @@ function K = covMaterniso(d, hyp, x, z, i)
 %         log(sf) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<3, K = '2'; return; end                  % report number of parameters
 if nargin<4, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 ell = exp(hyp(1));
 sf2 = exp(2*hyp(2));
@@ -43,7 +46,7 @@ else
   end
 end
 
-if nargin<5                                                        % covariances
+if nargin<5 || isempty(i)                                          % covariances
   K = sf2*m(sqrt(K),f);
 else                                                               % derivatives
   if i==1

@@ -1,4 +1,4 @@
-function K = covPeriodicNoDC(hyp, x, z, i)
+function [K, covdata] = covPeriodicNoDC(hyp, x, z, i, covdata)
 
 % Stationary covariance function for a smooth periodic function, with period p:
 %
@@ -15,12 +15,15 @@ function K = covPeriodicNoDC(hyp, x, z, i)
 % Note that covPeriodicNoDC converges to covCos as ell goes to infinity.
 %
 % Copyright (c) by James Robert Lloyd and Hannes Nickisch 2013-10-21.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M, COVCOS.M.
 
 if nargin<2, K = '3'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+
+covdata = [];
 
 [n,D] = size(x);
 if D>1, error('Covariance is defined for 1d data only.'), end
@@ -40,7 +43,7 @@ else
 end
 
 K = 2*pi*K/p;
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
   K = sf2*covD(K,ell);
 else
   if i==1

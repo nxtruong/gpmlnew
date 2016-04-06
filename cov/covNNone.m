@@ -1,4 +1,4 @@
-function K = covNNone(hyp, x, z, i)
+function [K, covdata] = covNNone(hyp, x, z, i, covdata)
 
 % Neural network covariance function with a single parameter for the distance
 % measure. The covariance function is parameterized as:
@@ -13,12 +13,15 @@ function K = covNNone(hyp, x, z, i)
 %         log(sqrt(sf2) ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<2, K = '2'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 n = size(x,1);
 ell2 = exp(2*hyp(1));
@@ -37,7 +40,7 @@ else
   end
 end
 
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
   K = sf2*asin(K);
 else                                                               % derivatives
   if i==1                                                          % lengthscale

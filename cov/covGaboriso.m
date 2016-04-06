@@ -1,4 +1,4 @@
-function K = covGaboriso(hyp, x, z, i)
+function [K, covdata] = covGaboriso(hyp, x, z, i, covdata)
 
 % Gabor covariance function with length scale ell and period p. The 
 % covariance function is parameterized as:
@@ -16,12 +16,15 @@ function K = covGaboriso(hyp, x, z, i)
 % For more help on design of covariance functions, try "help covFunctions".
 %
 % Copyright (c) by Hannes Nickisch, 2014-09-26.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M, COVGABORARD.M, COVSM.M.
 
 if nargin<2, K = '2'; return; end                          % report no of params
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 [n,D] = size(x);                                                % dimensionality
 ell = exp(hyp(1));                                                % length scale
@@ -47,7 +50,7 @@ if ~dg
 end
 
 K = exp(-d2/2);
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
   K = cos(2*pi*dp).*K;
 else                                                               % derivatives
   if i==1                                                         % length scale

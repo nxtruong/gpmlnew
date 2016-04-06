@@ -1,4 +1,4 @@
-function K = covPoly(d, hyp, x, z, i)
+function [K, covdata] = covPoly(d, hyp, x, z, i, covdata)
 
 % Polynomial covariance function. The covariance function is parameterized as:
 %
@@ -10,12 +10,15 @@ function K = covPoly(d, hyp, x, z, i)
 %         log(sf)  ]
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<3, K = '2'; return; end                  % report number of parameters
 if nargin<4, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 c = exp(hyp(1));                                          % inhomogeneous offset
 sf2 = exp(2*hyp(2));                                           % signal variance
@@ -32,7 +35,7 @@ else
   end
 end
 
-if nargin<5                                                        % covariances
+if nargin<5 || isempty(i)                                          % covariances
   K = sf2*( c + K ).^d;
 else                                                               % derivatives
   if i==1

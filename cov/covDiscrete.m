@@ -1,4 +1,4 @@
-function K = covDiscrete(s, hyp, x, z, i)
+function [K, covdata] = covDiscrete(s, hyp, x, z, i, covdata)
 
 % Covariance function for discrete inputs. Given a function defined on the
 % integers 1,2,3,..,s, the covariance function is parameterized as:
@@ -35,6 +35,7 @@ function K = covDiscrete(s, hyp, x, z, i)
 % For more help on design of covariance functions, try "help covFunctions".
 %
 % Copyright (c) by Roman Garnett, 2014-08-14.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also MEANDISCRETE.M, COVFUNCTIONS.M.
 
@@ -44,10 +45,12 @@ if nargin<4, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 if xeqz, z = x; end                                % make sure we have a valid z
 
+covdata = [];
+
 L = zeros(s); L(triu(true(s))) = hyp(:);                 % build Cholesky factor
 L(1:(s+1):end) = exp(diag(L));
 
-if nargin<5
+if nargin<5 || isempty(i)
   A = L'*L; % A is a placeholder for K to avoid a name clash with the return arg
   if dg
     K = A(sub2ind(size(A),x,x));

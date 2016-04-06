@@ -1,4 +1,4 @@
-function K = covLIN(hyp, x, z, i)
+function [K, covdata] = covLIN(hyp, x, z, i, covdata)
 
 % Linear covariance function. The covariance function is parameterized as:
 %
@@ -11,12 +11,15 @@ function K = covLIN(hyp, x, z, i)
 % Note that there is no bias or scale term; use covConst to add these.
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<2, K = '0'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 % compute inner products
 if dg                                                               % vector kxx
@@ -29,6 +32,6 @@ else
   end
 end
 
-if nargin>3                                                        % derivatives
+if nargin>3 && ~isempty(i)                                         % derivatives
   error('Unknown hyperparameter')
 end

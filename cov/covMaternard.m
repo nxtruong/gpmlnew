@@ -1,4 +1,4 @@
-function K = covMaternard(d, hyp, x, z, i)
+function [K, covdata] = covMaternard(d, hyp, x, z, i, covdata)
 
 % Matern covariance function with nu = d/2 and with Automatic Relevance
 % Determination (ARD) distance measure. For d=1 the function is also known as
@@ -7,7 +7,7 @@ function K = covMaternard(d, hyp, x, z, i)
 %
 %   k(x^p,x^q) = sf^2 * f( sqrt(d)*r ) * exp(-sqrt(d)*r)
 %
-% with f(t)=1 for d=1, f(t)=1+t for d=3 and f(t)=1+t+t²/3 for d=5.
+% with f(t)=1 for d=1, f(t)=1+t for d=3 and f(t)=1+t+t??/3 for d=5.
 % Here r is the distance sqrt((x^p-x^q)'*inv(P)*(x^p-x^q)), where the P matrix
 % is diagonal with ARD parameters ell_1^2,...,ell_D^2, where D is the dimension
 % of the input space and sf2 is the signal variance. The hyperparameters are:
@@ -19,6 +19,7 @@ function K = covMaternard(d, hyp, x, z, i)
 %         log(sf) ]
 %
 % Copyright (c) by Hannes Nickisch, 2013-10-13.
+% Modified and copyright (c) by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
@@ -26,7 +27,9 @@ if nargin<3, K = '(D+1)'; return; end              % report number of parameters
 if nargin<4, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
 
-[n,D] = size(x);
+covdata = [];
+
+[~,D] = size(x);
 ell = exp(hyp(1:D));
 sf2 = exp(2*hyp(D+1));
 if all(d~=[1,3,5]), error('only 1, 3 and 5 allowed for d'), end         % degree
@@ -49,7 +52,7 @@ else
   end
 end
 
-if nargin<5                                                        % covariances
+if nargin<5 || isempty(i)                                          % covariances
   K = sf2*m(sqrt(K),f);
 else                                                               % derivatives
   if i<=D                                               % length scale parameter

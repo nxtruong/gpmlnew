@@ -1,4 +1,4 @@
-function K = covSEisoU(hyp, x, z, i)
+function [K, covdata] = covSEisoU(hyp, x, z, i, covdata)
 
 % Squared Exponential covariance function with isotropic distance measure with
 % unit magnitude. The covariance function is parameterized as:
@@ -13,12 +13,15 @@ function K = covSEisoU(hyp, x, z, i)
 % For more help on design of covariance functions, try "help covFunctions".
 %
 % Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2010-09-10.
+% Modified by Truong X. Nghiem, 2016-04-01.
 %
 % See also COVFUNCTIONS.M.
 
 if nargin<2, K = '1'; return; end                  % report number of parameters
 if nargin<3, z = []; end                                   % make sure, z exists
 xeqz = isempty(z); dg = strcmp(z,'diag');                       % determine mode
+
+covdata = [];
 
 ell = exp(hyp(1));                                 % characteristic length scale
 
@@ -33,7 +36,7 @@ else
   end
 end
 
-if nargin<4                                                        % covariances
+if nargin<4 || isempty(i)                                          % covariances
   K = exp(-K/2);
 else                                                               % derivatives
   if i==1
